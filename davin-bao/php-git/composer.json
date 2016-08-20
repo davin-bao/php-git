@@ -1,0 +1,26 @@
+{
+  "name": "davin-bao/php-git",
+  "description": "php git for laravel5",
+  "keywords": ["laravel", "php", "git", "git client"],
+  "license": "MIT",
+  "authors": [
+    {
+      "name": "DavinBao",
+      "email": "davin.bao@gmail.com"
+    }
+  ],
+  "require": {
+    "php": ">=5.5.9",
+    "illuminate/support": "5.1.*|5.2.*"
+  },
+  "autoload": {
+    "psr-4": {
+      "DavinBao\\PhpGit\\": "src/"
+    }
+  },
+  "extra": {
+    "branch-alias": {
+      "dev-master": "1.0-dev"
+    }
+  }
+}
