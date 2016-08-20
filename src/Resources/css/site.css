@@ -19,12 +19,12 @@
     padding-bottom: 10px;
 }
 
-#branches .panel {
+.branch .row .panel {
     padding: 5px;
     margin: 2px;
 }
 
-#branches .btn {
+.branch .row .btn {
     float: right;
     margin-right: 5px;
 }

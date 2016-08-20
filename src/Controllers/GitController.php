@@ -23,7 +23,11 @@ class GitController extends BaseController
     public function getRepoList(Request $request){
         $repoList = app('config')->get('phpgit.repo_list');
         $currentRepo = $request->get('repo', current($repoList));
-        $this->getRepo($request)->fetch();
+        try{
+            $this->getRepo($request)->fetch();
+        }catch (\Exception $e){
+            $currentRepo = current($repoList);
+        }
 
         return new JsonResponse(array_merge(['rows'=>$repoList, 'current'=> $currentRepo], ['msg'=>'', 'code'=>200]), 200, $headers = [], 0);
     }
@@ -35,9 +39,28 @@ class GitController extends BaseController
         return new JsonResponse(array_merge(['rows'=>$branchList, 'status' => $status], ['msg'=>'', 'code'=>200]), 200, $headers = [], 0);
     }
 
+    public function getRemoteBranches(Request $request){
+        $branchList = $this->getRepo($request)->list_remote_branches();
+        $status = $this->getRepo($request)->status(true);
+
+        return new JsonResponse(array_merge(['rows'=>$branchList, 'status' => $status], ['msg'=>'', 'code'=>200]), 200, $headers = [], 0);
+    }
+
     public function postCheckout(Request $request){
         $branch = $request->get('branch', 'master');
         $result = $this->getRepo($request)->checkout($branch);
+
+        $commands = app('config')->get('phpgit.command');
+        foreach($commands as $command){
+            $this->getRepo($request)->run_command($command);
+        }
+
+        return new JsonResponse(['msg'=>$result, 'code'=>200], 200, $headers = [], 0);
+    }
+
+    public function postRemoteCheckout(Request $request){
+        $branch = $request->get('branch', 'origin/master');
+        $result = $this->getRepo($request)->remote_checkout($branch);
 
         $commands = app('config')->get('phpgit.command');
         foreach($commands as $command){

@@ -53,9 +53,17 @@ class PhpGitServiceProvider extends ServiceProvider
                 'uses' => 'GitController@getBranches',
                 'as' => 'git.branches',
             ]);
+            $router->get('git/remote-branches', [
+                'uses' => 'GitController@getRemoteBranches',
+                'as' => 'git.remote-branches',
+            ]);
             $router->post('git/checkout', [
                 'uses' => 'GitController@postCheckout',
                 'as' => 'git.checkout',
+            ]);
+            $router->post('git/remote-checkout', [
+                'uses' => 'GitController@postRemoteCheckout',
+                'as' => 'git.remote-checkout',
             ]);
             $router->post('git/delete', [
                 'uses' => 'GitController@postDelete',
@@ -74,6 +82,8 @@ class PhpGitServiceProvider extends ServiceProvider
         });
 
         $this->loadViewsFrom(__DIR__.'/views', 'php_git');
+
+        $this->registerMiddleware('php_git_catch_exception', 'DavinBao\PhpGit\Middleware\CatchException');
     }
 
     /**
@@ -86,6 +96,11 @@ class PhpGitServiceProvider extends ServiceProvider
         $configPath = __DIR__ . '/../config/phpgit.php';
         $this->mergeConfigFrom($configPath, 'phpgit');
 
+    }
+
+    protected function registerMiddleware($key, $middleware)
+    {
+        $this->app['router']->middleware($key, $middleware);
     }
 
     /**

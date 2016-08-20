@@ -5,7 +5,7 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}"/>
-    <title>Bootstrap 101 Template</title>
+    <title>Git Client For PHP</title>
 
     <link rel="stylesheet" href="{{ url('_tool/assets/css/bootstrap.min') }}" />
     <link rel="stylesheet" href="{{ url('_tool/assets/css/bootstrap-theme.min') }}" />
@@ -60,8 +60,15 @@
           </span>
         </div>
         <div>
-            <h3 class="package-amount left" id="">Current Branch  <span class="text-success" id="active-branch"></span> </h3>
+            <h3 class="package-amount left" id="">Active Branch  <span class="text-success" id="active-branch"></span> </h3>
+        </div>
+        <div>
+            <h3 class="package-amount left" id="">Local Branches</h3>
             <div class="row" id="branches"></div>
+        </div>
+        <div>
+            <h3 class="package-amount left" id="">Remote Branches</h3>
+            <div class="row" id="remote-branches"></div>
         </div>
     </div>
     <div class="jumbotron status">
@@ -93,7 +100,9 @@
     page = {
         repoListDom: $('#repo-list'),
         statusDom: $('#status'),
+        branchDom: $('.branch'),
         branchesDom: $('#branches'),
+        remoteBranchesDom: $('#remote-branches'),
         activeBranchDom: $('#active-branch'),
 
         newBranchBtnDom: $('#new-branch'),
@@ -120,18 +129,30 @@
                 self.branchesDom.html('');
                 self.statusDom.html(data.status);
 
-                for(var i=0; i<data.rows.length; i++){
-                    if(data.rows[i].indexOf('*') > -1){
-                        self.activeBranchDom.html(data.rows[i]);
-                        continue;
+                $.each(data.rows, function(i, value){
+                    if(value.indexOf('*') > -1){
+                        self.activeBranchDom.html(value);
+                        return true;
                     }
                     self.branchesDom.append(
-                        '<div class="panel panel-default pull-left">'+data.rows[i]+'&nbsp;&nbsp;&nbsp;\
-                        <button type="button" data-branch="'+data.rows[i]+'" class="btn btn-danger btn-default pull-right delete">X</button>\
-                        <button type="button" data-branch="'+data.rows[i]+'" class="btn btn-success btn-default pull-right checkout">active</button>\
+                            '<div class="panel panel-default pull-left">'+value+'&nbsp;&nbsp;&nbsp;\
+                        <button type="button" data-branch="'+value+'" class="btn btn-danger btn-default pull-right delete">X</button>\
+                        <button type="button" data-branch="'+value+'" class="btn btn-success btn-default pull-right checkout">active</button>\
                         </div>'
                     );
-                }
+                });
+            });
+
+            this.ajaxGet(_prefix + '/remote-branches', this.urlParam(), function(data){
+
+                self.remoteBranchesDom.html('');
+                $.each(data.rows, function(i, value){
+                    self.remoteBranchesDom.append(
+                            '<div class="panel panel-default pull-left">'+value+'&nbsp;&nbsp;&nbsp;\
+                        <button type="button" data-branch="'+value+'" class="btn btn-success btn-default pull-right checkout">active</button>\
+                        </div>'
+                    );
+                });
             });
         },
         checkout: function(branch){
@@ -141,6 +162,16 @@
             });
 
             this.ajaxPost(_prefix + '/checkout', param, function(){
+                self.initBranches();
+            });
+        },
+        remoteCheckout: function(branch){
+            var self = this;
+            var param = $.extend(true, this.urlParam(), {
+                branch: branch
+            });
+
+            this.ajaxPost(_prefix + '/remote-checkout', param, function(){
                 self.initBranches();
             });
         },
@@ -163,6 +194,15 @@
                 self.checkout(branch);
             });
 
+            this.branchDom.on('keydown', 'input', function(e){
+                var ev = document.all ? window.event : e;
+                if(ev.keyCode==13) {
+                    var branch = $(this).val();
+                    $(this).val('');
+                    self.checkout(branch);
+                }
+            });
+
             this.branchesDom.on('click', '.checkout', function(){
                 self.checkout($(this).data('branch'));
             });
@@ -170,10 +210,15 @@
             this.branchesDom.on('click', '.delete', function(){
                 self.deleteBranch($(this).data('branch'));
             });
+
+            this.remoteBranchesDom.on('click', '.checkout', function(){
+                self.remoteCheckout($(this).data('branch'));
+            });
         },
 
         ajaxGet: function(url, params, callback){
             var self =this;
+            self.activeBranchDom.html('waiting... ');
 
             $.ajax({
                 type: "GET",
@@ -208,6 +253,7 @@
 
         ajaxPost: function(url, params, callback){
             var self =this;
+            self.activeBranchDom.html('waiting... ');
 
             $.ajax({
                 type: "POST",

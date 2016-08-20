@@ -550,6 +550,17 @@ class GitRepo {
         return $this->run("checkout $branch");
     }
 
+    /**
+     * Runs a `git checkout --track` call
+     *
+     * Accepts a name for the branch
+     *
+     * @param   string  branch name
+     * @return string
+     */
+    public function remote_checkout($branch) {
+        return $this->run("checkout --track $branch");
+    }
 
     /**
      * Runs a `git merge` call

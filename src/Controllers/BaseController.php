@@ -14,6 +14,9 @@ if (class_exists('Illuminate\Routing\Controller')) {
     class BaseController extends Controller
     {
 
+        public function __construct() {
+            $this->middleware('php_git_catch_exception');
+        }
     }
 
 } else {
