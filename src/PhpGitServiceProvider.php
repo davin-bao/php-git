@@ -81,7 +81,7 @@ class PhpGitServiceProvider extends ServiceProvider
             ]);
         });
 
-        $this->loadViewsFrom(__DIR__.'/views', 'php_git');
+        $this->loadViewsFrom(__DIR__.'/Views', 'php_git');
 
         $this->registerMiddleware('php_git_catch_exception', 'DavinBao\PhpGit\Middleware\CatchException');
     }
