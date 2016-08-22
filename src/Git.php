@@ -585,7 +585,7 @@ class GitRepo {
      * @return  string
      */
     public function fetch() {
-        return $this->run("fetch");
+        return $this->run("fetch --progress --prune");
     }
 
     /**
