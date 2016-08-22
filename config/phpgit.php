@@ -18,6 +18,8 @@ return array(
      */
     'route_prefix' => '_tool',
 
+    'git_path' => '/usr/bin/git',
+
     /*
      | git repositories root path
      */

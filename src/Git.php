@@ -29,7 +29,7 @@ class Git {
      *
      * @var string
      */
-    protected static $bin = '/usr/bin/git';
+    public static $bin = '/usr/bin/git';
 
     /**
      * Sets git executable path
@@ -279,6 +279,8 @@ class GitRepo {
      * @return  string
      */
     public function run_command($command) {
+        \Log::debug($command);
+
         $descriptorspec = array(
             1 => array('pipe', 'w'),
             2 => array('pipe', 'w'),

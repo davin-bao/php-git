@@ -108,7 +108,7 @@
         newBranchBtnDom: $('#new-branch'),
 
         init: function(){
-            this.initRepoList(), this.initBranches(), this.addEvent()
+            this.initRepoList(), this.addEvent()
         },
         initRepoList: function(){
             var self = this;
@@ -121,6 +121,7 @@
                     var url = self.rootUrl() + _prefix + '?repo=' + value;
                     self.repoListDom.append('<li class="' + style + '"><a href="' + url + '">' + key + '</a></li>');
                 });
+                self.initBranches();
             });
         },
         initBranches: function(){

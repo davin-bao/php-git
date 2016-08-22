@@ -14,6 +14,12 @@ use Illuminate\Http\Request;
 class GitController extends BaseController
 {
     public $repo;
+
+    public function __construct() {
+
+        Git::$bin = app('config')->get('phpgit.git_path');
+        parent::__construct();
+    }
    
     public function index(Request $request)
     {
@@ -26,6 +32,8 @@ class GitController extends BaseController
         try{
             $this->getRepo($request)->fetch();
         }catch (\Exception $e){
+            echo $e->getMessage();
+            die;
             $currentRepo = current($repoList);
         }
 
@@ -49,6 +57,7 @@ class GitController extends BaseController
     public function postCheckout(Request $request){
         $branch = $request->get('branch', 'master');
         $result = $this->getRepo($request)->checkout($branch);
+        $result = $this->getRepo($request)->pull('origin', $branch);
 
         $commands = app('config')->get('phpgit.command');
         foreach($commands as $command){
