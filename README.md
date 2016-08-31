@@ -23,11 +23,12 @@ DavinBao\PhpGit\PhpGitServiceProvider::class,
 ```
 php artisan vendor:publish --provider="DavinBao\PhpGit\PhpGitServiceProvider"
 ```
+4. SET umask 022 to umask 000 in /etc/profile
 
 ## Configuration
 
 config file is in app/config/phpgit.php
 
-4. default, you can visit the url
+5. default, you can visit the url
 
 http://your_domain/_tool/git

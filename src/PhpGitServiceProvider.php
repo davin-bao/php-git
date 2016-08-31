@@ -95,7 +95,6 @@ class PhpGitServiceProvider extends ServiceProvider
     {
         $configPath = __DIR__ . '/../config/phpgit.php';
         $this->mergeConfigFrom($configPath, 'phpgit');
-
     }
 
     protected function registerMiddleware($key, $middleware)

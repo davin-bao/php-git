@@ -56,12 +56,15 @@ class GitController extends BaseController
 
     public function postCheckout(Request $request){
         $branch = $request->get('branch', 'master');
-        $result = $this->getRepo($request)->checkout($branch);
-        $result = $this->getRepo($request)->pull('origin', $branch);
+        $repo = $this->getRepo($request);
+
+        $repo->clean(true, true);
+        $repo->checkout($branch);
+        $result = $repo->pull('origin', $branch);
 
         $commands = app('config')->get('phpgit.command');
         foreach($commands as $command){
-            $this->getRepo($request)->run_command($command);
+            $repo->run_command($command);
         }
 
         return new JsonResponse(['msg'=>$result, 'code'=>200], 200, $headers = [], 0);
@@ -69,11 +72,14 @@ class GitController extends BaseController
 
     public function postRemoteCheckout(Request $request){
         $branch = $request->get('branch', 'origin/master');
-        $result = $this->getRepo($request)->remote_checkout($branch);
+        $repo = $this->getRepo($request);
+
+        $repo->clean(true, true);
+        $result = $repo->remote_checkout($branch);
 
         $commands = app('config')->get('phpgit.command');
         foreach($commands as $command){
-            $this->getRepo($request)->run_command($command);
+            $repo->run_command($command);
         }
 
         return new JsonResponse(['msg'=>$result, 'code'=>200], 200, $headers = [], 0);
