@@ -32,8 +32,6 @@ class GitController extends BaseController
         try{
             $this->getRepo($request)->fetch();
         }catch (\Exception $e){
-            echo $e->getMessage();
-            die;
             $currentRepo = current($repoList);
         }
 

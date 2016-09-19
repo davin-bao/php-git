@@ -242,9 +242,10 @@
                         errData = $.extend(true, {'code': 422, 'msg': '输入参数有误', 'errData': err.responseJSON });
                     }else if(err.status == 403) {
                         errData = {'code': 403, 'msg': '禁止访问！'};
-                    }
-                    else if(typeof(err.responseJSON) !== "undefined"){
+                    }else if(typeof(err.responseJSON) !== "undefined"){
                         errData = err.responseJSON;
+                    }else if(typeof(err.responseText) !== "undefined" && err.responseText != ''){
+                        errData.msg = err.responseText;
                     }
 
                     self.alert('CODE: ' + errData.code + ':' + errData.msg, 'danger');
@@ -277,9 +278,10 @@
                         errData = $.extend(true, {'code': 422, 'msg': '输入参数有误', 'errData': err.responseJSON });
                     }else if(err.status == 403) {
                         errData = {'code': 403, 'msg': '禁止访问！'};
-                    }
-                    else if(typeof(err.responseJSON) !== "undefined"){
+                    }else if(typeof(err.responseJSON) !== "undefined"){
                         errData = err.responseJSON;
+                    }else if(typeof(err.responseText) !== "undefined" && err.responseText != ''){
+                        errData.msg = err.responseText;
                     }
 
                     self.alert('CODE: ' + errData.code + ':' + errData.msg, 'danger');
