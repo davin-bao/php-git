@@ -3,6 +3,7 @@
 use Symfony\Component\HttpFoundation\JsonResponse;
 use DavinBao\PhpGit\Git;
 use Illuminate\Http\Request;
+use Symfony\Component\Process\Process;
 
 /**
  * Class GitController
@@ -62,7 +63,8 @@ class GitController extends BaseController
 
         $commands = app('config')->get('phpgit.command');
         foreach($commands as $command){
-            $repo->run_command($command);
+            $process = new Process($command);
+            $process->run();
         }
 
         return new JsonResponse(['msg'=>$result, 'code'=>200], 200, $headers = [], 0);
@@ -77,7 +79,8 @@ class GitController extends BaseController
 
         $commands = app('config')->get('phpgit.command');
         foreach($commands as $command){
-            $repo->run_command($command);
+            $process = new Process($command);
+            $process->run();
         }
 
         return new JsonResponse(['msg'=>$result, 'code'=>200], 200, $headers = [], 0);
