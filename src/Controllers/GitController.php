@@ -64,7 +64,16 @@ class GitController extends BaseController
         $commands = app('config')->get('phpgit.command');
         foreach($commands as $command){
             $process = new Process($command);
-            $process->run();
+            $workingDirectory = $process->getWorkingDirectory();
+            $process->setWorkingDirectory(str_replace('/public', '', $workingDirectory));
+
+            $commandOutput = '';
+            $process->run(function ($type, $buffer) use(&$commandOutput) {
+                $commandOutput = $commandOutput . nl2br($buffer);
+            });
+            if(!$process->isSuccessful() || strpos($commandOutput, 'Rebuild database Success') === false){
+                return new JsonResponse(['msg'=>$commandOutput, 'code'=>500], 500, $headers = [], 0);
+            }
         }
 
         return new JsonResponse(['msg'=>$result, 'code'=>200], 200, $headers = [], 0);

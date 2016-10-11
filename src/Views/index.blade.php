@@ -247,7 +247,7 @@
                     }else if(typeof(err.responseText) !== "undefined" && err.responseText != ''){
                         errData.msg = err.responseText;
                     }
-
+                    page.activeBranchDom.html('error !');
                     self.alert('CODE: ' + errData.code + ':' + errData.msg, 'danger');
                 }
             });
@@ -283,7 +283,7 @@
                     }else if(typeof(err.responseText) !== "undefined" && err.responseText != ''){
                         errData.msg = err.responseText;
                     }
-
+                    page.activeBranchDom.html('error !');
                     self.alert('CODE: ' + errData.code + ':' + errData.msg, 'danger');
                 }
             });
