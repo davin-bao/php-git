@@ -32,8 +32,8 @@ return array(
      */
     'command' => [
 //        'composer dump-autoload',
-        'php artisan db:clear',
-        'php artisan migrate --seed',
-        'php artisan acl:update'
+//        'php artisan migrate --seed',
+//        'php artisan acl:update',
+        'php artisan patch:script',
     ]
 );
