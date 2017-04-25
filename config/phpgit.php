@@ -34,6 +34,7 @@ return array(
 //        'composer dump-autoload',
 //        'php artisan migrate --seed',
 //        'php artisan acl:update',
+        'php artisan patch:db',
         'php artisan patch:script',
     ]
 );
