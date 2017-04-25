@@ -59,13 +59,7 @@ class PatchDb extends Command
 
         $sqlPath = app('config')->get('phpgit.path');
 
-        if (!empty($branch)) {
-            $branch = trim($branch);
-            $i      = strripos($branch, '/');
-            $branch = strtolower(substr($branch, $i + 1));
-        }else{
-            return $self->error("Expect parameter '--branch'\n");
-        }
+        $branch = $self->getBranch($self);
 
         if($option === 'true'){
             try {
@@ -94,5 +88,23 @@ class PatchDb extends Command
         }
 
         return $self->info("Patching database Success\n");
+    }
+
+    /**
+     * 获取当前分支名称
+     *
+     * @return mixed
+     */
+    public function getBranch($self){
+        $branch = @file_get_contents(base_path() . '/.git/HEAD');
+
+        if (!empty($branch)) {
+            $branch = trim($branch);
+            $i      = strripos($branch, '/');
+            $branch = strtolower(substr($branch, $i + 1));
+            return $branch;
+        }else{
+            return $self->error("Expect parameter '--branch'\n");
+        }
     }
 }

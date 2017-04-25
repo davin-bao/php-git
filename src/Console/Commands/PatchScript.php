@@ -59,15 +59,7 @@ class PatchScript extends Command
         $option = $this->option('uninstall');
         $path = app('config')->get('phpgit.path');
 
-        //获取当前分支名称
-        $branch = @file_get_contents(base_path() . '/.git/HEAD');
-        if (!empty($branch)) {
-            $branch = trim($branch);
-            $i      = strripos($branch, '/');
-            $branch = strtolower(substr($branch, $i + 1));
-        }else{
-            return $self->error("Expect parameter '--branch'\n");
-        }
+        $branch = $self->getBranch($self);
 
         if ($option ===  'true') {
             try {
@@ -86,16 +78,42 @@ class PatchScript extends Command
         if($option === 'false'){
             try {
                 set_time_limit(0);
-                $pathFile = strtolower(dirname(app_path())."/database/patchs/$branch.php");
+                $pathFile = strtolower(dirname(app_path()).$path."$branch.php");
+                $scriptFile = strtolower(dirname(app_path()).$path."ScriptBase.php");
+
+                if(file_exists($scriptFile)){
+                    require_once $scriptFile;
+                }
+
                 if (file_exists($pathFile)){
                     require_once $pathFile;
-                    $script = new \Script();
+                    $script =new \Script();
                     $script->install($branch);
                 }
+
+
             } catch (\Exception $e) {
                 return $self->error($e->getMessage(). "\n" . $e->getTraceAsString() . "\n");
             }
         }
         return $self->info("Patching database Success\n");
+    }
+
+    /**
+     * 获取当前分支名称
+     *
+     * @return mixed
+     */
+    public function getBranch($self){
+        $branch = @file_get_contents(base_path() . '/.git/HEAD');
+
+        if (!empty($branch)) {
+            $branch = trim($branch);
+            $i      = strripos($branch, '/');
+            $branch = strtolower(substr($branch, $i + 1));
+            return $branch;
+        }else{
+            return $self->error("Expect parameter '--branch'\n");
+        }
     }
 }
