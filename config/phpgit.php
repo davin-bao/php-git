@@ -37,15 +37,15 @@ return array(
      | php git will run this command before checkout the branch
      */
     'install_command' => [
-        env('PHP_GIT_COMMAND', '/xmisp/server/php7/bin/php artisan patch:db --uninstall=true'),
-        env('PHP_SCRIPT_COMMAND', '/xmisp/server/php7/bin/php artisan patch:script --uninstall=true'),
+        env('PHP_GIT_COMMAND', '/xmisp/server/php7/bin/php artisan patch:db -i'),
+        env('PHP_SCRIPT_COMMAND', '/xmisp/server/php7/bin/php artisan patch:script -i'),
     ],
 
     /*
      | php git will run this command after checkout the branch
      */
     'uninstall_command' => [
-        env('PHP_GIT_COMMAND', '/xmisp/server/php7/bin/php artisan patch:db --uninstall=false'),
-        env('PHP_SCRIPT_COMMAND', '/xmisp/server/php7/bin/php artisan patch:script --uninstall=false'),
+        env('PHP_GIT_COMMAND', '/xmisp/server/php7/bin/php artisan patch:db -u'),
+        env('PHP_SCRIPT_COMMAND', '/xmisp/server/php7/bin/php artisan patch:script -u'),
     ],
 );
