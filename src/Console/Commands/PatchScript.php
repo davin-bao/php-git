@@ -10,12 +10,12 @@ use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Process\Process;
 
 /**
- * 运行数据库补丁
+ * 运行脚本补丁
  *
  * @package App\Console\Commands
  *
- * @author davin.bao
- * @since 2016/9/22 14:34
+ * @author cunqinghuang
+ * @since 2017/4/25 14:34
  */
 class PatchScript extends Command
 {
@@ -44,7 +44,8 @@ class PatchScript extends Command
     protected function getOptions()
     {
         return [
-            ['uninstall', null, InputOption::VALUE_REQUIRED, 'install or uninstall for patch.', null],
+            ['uninstall', 'u', InputOption::VALUE_NONE, 'uninstall for patch.'],
+            ['install', 'i', InputOption::VALUE_NONE, 'install for patch.'],
         ];
     }
     /**
@@ -56,7 +57,10 @@ class PatchScript extends Command
     {
         $self = $this;
         $self->info("Patching script... \n");
-        $option = $this->option('uninstall');
+
+        $unOption = $this->option('uninstall');
+        $inOption = $this->option('install');
+
         $path = app('config')->get('phpgit.path');
 
         $branch = $self->getBranch($self);
@@ -67,7 +71,7 @@ class PatchScript extends Command
             require_once $scriptFile;
         }
 
-        if ($option ===  'true') {
+        if ($unOption) {
             try {
                 set_time_limit(0);
                 $pathFile = strtolower(dirname(app_path()).$path.$branch.".php");
@@ -81,7 +85,7 @@ class PatchScript extends Command
             }
         }
 
-        if($option === 'false'){
+        if($inOption){
             try {
                 set_time_limit(0);
                 $pathFile = strtolower(dirname(app_path()).$path."$branch.php");
@@ -91,13 +95,11 @@ class PatchScript extends Command
                     $script =new \Script();
                     $script->install($branch);
                 }
-
-
             } catch (\Exception $e) {
                 return $self->error($e->getMessage(). "\n" . $e->getTraceAsString() . "\n");
             }
         }
-        return $self->info("Patching database Success\n");
+        return $self->info("Patching Script Success\n");
     }
 
     /**

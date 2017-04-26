@@ -43,7 +43,8 @@ class PatchDb extends Command
     protected function getOptions()
     {
         return [
-            ['uninstall', null, InputOption::VALUE_REQUIRED, 'install or uninstall for patch.', null],
+            ['uninstall', 'u', InputOption::VALUE_NONE, 'uninstall for patch.'],
+            ['install', 'i', InputOption::VALUE_NONE, 'install for patch.'],
         ];
     }
     /**
@@ -55,13 +56,14 @@ class PatchDb extends Command
     {
         $self = $this;
         $self->info("Patching database... \n");
-        $option = $this->option('uninstall');
+        $unOption = $this->option('uninstall');
+        $inOption = $this->option('install');
 
         $sqlPath = app('config')->get('phpgit.path');
 
         $branch = $self->getBranch($self);
 
-        if($option === 'true'){
+        if($unOption){
             try {
                 set_time_limit(0);
                 $sqlFile = strtolower(dirname(app_path()).$sqlPath.$branch."-uninstall.sql");
@@ -74,7 +76,7 @@ class PatchDb extends Command
             }
         }
 
-        if($option === 'false'){
+        if($inOption){
             try {
                 set_time_limit(0);
                 $sqlFile = strtolower(dirname(app_path()).$sqlPath.$branch."-install.sql");
