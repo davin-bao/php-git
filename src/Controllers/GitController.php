@@ -58,7 +58,7 @@ class GitController extends BaseController
         $branch = $request->get('branch', 'master');
         $repo = $this->getRepo($request);
 
-        $commands = app('config')->get('phpgit.install_command');
+        $commands = app('config')->get('phpgit.uninstall_command');
         foreach($commands as $command){
             $process = new Process($command);
             $workingDirectory = $process->getWorkingDirectory();
@@ -80,7 +80,7 @@ class GitController extends BaseController
         $repo->checkout($branch);
         $result = $repo->pull('origin', $branch);
 
-        $commands = app('config')->get('phpgit.uninstall_command');
+        $commands = app('config')->get('phpgit.install_command');
         foreach($commands as $command){
             if($command){
                 $process = new Process($command);
