@@ -51,17 +51,17 @@ http://your_domain/_tool/git
 
  'install_command' => [
 
-  env('PHP_GIT_COMMAND', '（当前php文件的所在路径）php artisan patch:db --uninstall=true'),
+  env('PHP_GIT_COMMAND', '（当前php文件的所在路径）php artisan patch:db -i'),
 
-  env('PHP_SCRIPT_COMMAND', '（当前php文件的所在路径）php artisan patch:script --uninstall=true')
+  env('PHP_SCRIPT_COMMAND', '（当前php文件的所在路径）php artisan patch:script -i')
 
   ],
 
  'uninstall_command' => [
 
-  env('PHP_GIT_COMMAND', '（当前php文件的所在路径）php artisan patch:db --uninstall=false'),
+  env('PHP_GIT_COMMAND', '（当前php文件的所在路径）php artisan patch:db -u'),
 
-  env('PHP_SCRIPT_COMMAND', '（当前php文件的所在路径）php artisan patch:script --uninstall=false'),
+  env('PHP_SCRIPT_COMMAND', '（当前php文件的所在路径）php artisan patch:script -u'),
 
    ]
 
