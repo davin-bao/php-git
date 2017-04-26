@@ -71,7 +71,7 @@ http://your_domain/_tool/git
 
   创建3个文件：
 
-  BranchName.php   修改配置文件参数含有 install，uninstall 两个方法
+  BranchName.php   修改配置文件参数脚本文件 需含有 install，uninstall 两个方法
 
   BranchName-uninstall.sql  切换分支前执行的安装sql语句
 
