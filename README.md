@@ -1,4 +1,4 @@
-## PHP Git Client For Laravel
+﻿## PHP Git Client For Laravel
 
 This project uses the Laravel 5.1 framework. Actually this is starter Laravel 5.1 project. It has add git repository, switch branch, checkout / delete branch .etc
 
@@ -64,7 +64,7 @@ http://your_domain/_tool/git
 
    ]
 
-   提示：必须是.env文件里没有配置 PHP_GIT_COMMAND 和 PHP_SCRIPT_COMMAND 没有配置这两个参数才可生效
+   提示：必须是.env文件里没有配置 PHP_GIT_COMMAND 和 PHP_SCRIPT_COMMAND 参数才可生效
 
 2.在 sql文件的存放路径 创建文件（BranchName 分支名）
 
