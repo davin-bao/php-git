@@ -65,7 +65,7 @@ class PatchScript extends Command
 
         $branch = $self->getBranch($self);
 
-        $scriptFile = strtolower(dirname(app_path()).$path."ScriptBase.php");
+        $scriptFile = dirname(app_path()).$path."ScriptBase.php";
 
         if(file_exists($scriptFile)){
             require_once $scriptFile;
