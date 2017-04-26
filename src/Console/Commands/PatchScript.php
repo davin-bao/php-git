@@ -10,12 +10,12 @@ use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Process\Process;
 
 /**
- * 运行脚本
+ * 运行数据库补丁
  *
  * @package App\Console\Commands
  *
- * @author cunqinghuang
- * @since 2017/4/25 14:34
+ * @author davin.bao
+ * @since 2016/9/22 14:34
  */
 class PatchScript extends Command
 {
@@ -61,6 +61,12 @@ class PatchScript extends Command
 
         $branch = $self->getBranch($self);
 
+        $scriptFile = strtolower(dirname(app_path()).$path."ScriptBase.php");
+
+        if(file_exists($scriptFile)){
+            require_once $scriptFile;
+        }
+
         if ($option ===  'true') {
             try {
                 set_time_limit(0);
@@ -79,11 +85,6 @@ class PatchScript extends Command
             try {
                 set_time_limit(0);
                 $pathFile = strtolower(dirname(app_path()).$path."$branch.php");
-                $scriptFile = strtolower(dirname(app_path()).$path."ScriptBase.php");
-
-                if(file_exists($scriptFile)){
-                    require_once $scriptFile;
-                }
 
                 if (file_exists($pathFile)){
                     require_once $pathFile;
