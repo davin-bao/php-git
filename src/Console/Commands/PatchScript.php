@@ -74,7 +74,7 @@ class PatchScript extends Command
         if ($unOption) {
             try {
                 set_time_limit(0);
-                $pathFile = dirname(app_path()).$path.$branch.".php";
+                $pathFile = strtolower(dirname(app_path()).$path.$branch.".php");
                 if (file_exists($pathFile)){
                     require_once $pathFile;
                     $script = new \Script();
