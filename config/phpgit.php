@@ -28,12 +28,24 @@ return array(
     ],
 
     /*
-     | php git will run this command when checkout the branch
+      | git script path
+      */
+
+    'path'=>'/database/patchs/',
+
+    /*
+     | php git will run this command before checkout the branch
      */
-    'command' => [
-//        'composer dump-autoload',
-        'php artisan db:clear',
-        'php artisan migrate --seed',
-        'php artisan acl:update'
-    ]
+    'install_command' => [
+        env('PHP_GIT_COMMAND', '/xmisp/server/php7/bin/php artisan patch:db -i'),
+        env('PHP_SCRIPT_COMMAND', '/xmisp/server/php7/bin/php artisan patch:script -i'),
+    ],
+
+    /*
+     | php git will run this command after checkout the branch
+     */
+    'uninstall_command' => [
+        env('PHP_GIT_COMMAND', '/xmisp/server/php7/bin/php artisan patch:db -u'),
+        env('PHP_SCRIPT_COMMAND', '/xmisp/server/php7/bin/php artisan patch:script -u'),
+    ],
 );

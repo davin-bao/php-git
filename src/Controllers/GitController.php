@@ -21,7 +21,7 @@ class GitController extends BaseController
         Git::$bin = app('config')->get('phpgit.git_path');
         parent::__construct();
     }
-   
+
     public function index(Request $request)
     {
         return view('php_git::index');
@@ -40,6 +40,7 @@ class GitController extends BaseController
     }
 
     public function getBranches(Request $request){
+
         $branchList = $this->getRepo($request)->list_branches(true);
         $status = $this->getRepo($request)->status(true);
 
@@ -57,25 +58,49 @@ class GitController extends BaseController
         $branch = $request->get('branch', 'master');
         $repo = $this->getRepo($request);
 
-        $repo->clean(true, true);
-        $repo->checkout($branch);
-        $result = $repo->pull('origin', $branch);
-
-        $commands = app('config')->get('phpgit.command');
+        $commands = app('config')->get('phpgit.uninstall_command');
         foreach($commands as $command){
             $process = new Process($command);
             $workingDirectory = $process->getWorkingDirectory();
             $process->setWorkingDirectory(str_replace('/public', '', $workingDirectory));
-
             $commandOutput = '';
             $process->run(function ($type, $buffer) use(&$commandOutput) {
                 $commandOutput = $commandOutput . nl2br($buffer);
             });
-            if(!$process->isSuccessful() || strpos($commandOutput, 'Rebuild database Success') === false){
+            if(!$process->isSuccessful() ||
+                (strpos($commandOutput, 'Rebuild database Success') === false &&
+                    strpos($commandOutput, 'Patching script Success') === false &&
+                    strpos($commandOutput, 'Patching database Success') === false)
+            ){
                 return new JsonResponse(['msg'=>$commandOutput, 'code'=>500], 500, $headers = [], 0);
             }
         }
 
+        $repo->clean(true, true);
+        $repo->checkout($branch);
+        $result = $repo->pull('origin', $branch);
+
+        $commands = app('config')->get('phpgit.install_command');
+        foreach($commands as $command){
+            if($command){
+                $process = new Process($command);
+                $workingDirectory = $process->getWorkingDirectory();
+                $process->setWorkingDirectory(str_replace('/public', '', $workingDirectory));
+
+                $commandOutput = '';
+                $process->run(function ($type, $buffer) use(&$commandOutput) {
+                    $commandOutput = $commandOutput . nl2br($buffer);
+                });
+                if(!$process->isSuccessful() ||
+                    (strpos($commandOutput, 'Rebuild database Success') === false &&
+                        strpos($commandOutput, 'Patching script Success') === false &&
+                        strpos($commandOutput, 'Patching database Success') === false
+                    )
+                ){
+                    return new JsonResponse(['msg'=>$commandOutput, 'code'=>500], 500, $headers = [], 0);
+                }
+            }
+        }
         return new JsonResponse(['msg'=>$result, 'code'=>200], 200, $headers = [], 0);
     }
 

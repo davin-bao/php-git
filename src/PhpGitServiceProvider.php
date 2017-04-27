@@ -95,6 +95,16 @@ class PhpGitServiceProvider extends ServiceProvider
     {
         $configPath = __DIR__ . '/../config/phpgit.php';
         $this->mergeConfigFrom($configPath, 'phpgit');
+
+        $this->app->bindShared('command.patch.script', function () {
+            return new \DavinBao\PhpGit\Console\Commands\PatchScript;
+        });
+
+        $this->app->bindShared('command.patch.db', function () {
+            return new \DavinBao\PhpGit\Console\Commands\PatchDb;
+        });
+
+        $this->commands(array('command.patch.script', 'command.patch.db'));
     }
 
     protected function registerMiddleware($key, $middleware)
