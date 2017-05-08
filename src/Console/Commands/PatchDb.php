@@ -45,6 +45,8 @@ class PatchDb extends Command
         return [
             ['uninstall', 'u', InputOption::VALUE_NONE, 'uninstall for patch.'],
             ['install', 'i', InputOption::VALUE_NONE, 'install for patch.'],
+            ['put_file', 'p', InputOption::VALUE_OPTIONAL, 'install for sql file.'],
+            ['off_file', 'o', InputOption::VALUE_OPTIONAL, 'uninstall for sql file.'],
         ];
     }
     /**
@@ -58,38 +60,21 @@ class PatchDb extends Command
         $self->info("Patching database... \n");
         $unOption = $this->option('uninstall');
         $inOption = $this->option('install');
+        $putOption = $this->option('put_file');
+        $offOption = $this->option('off_file');
 
         $sqlPath = app('config')->get('phpgit.path');
 
         $branch = $self->getBranch($self);
 
-        if($unOption){
-            try {
-                set_time_limit(0);
-                $sqlFile = strtolower(dirname(app_path()).$sqlPath.$branch."-uninstall.sql");
-                if(file_exists($sqlFile)){
-                    $self->info("Patching database file: $sqlFile\n");
-                    DB::unprepared(file_get_contents($sqlFile));
-                }
-            } catch (\Exception $e) {
-                return $self->error($e->getMessage(). "\n" . $e->getTraceAsString() . "\n");
-            }
+        $production = app('config')->get('app.debug');
+        if(!$production){
+            $self->executeProductionSql($sqlPath,$unOption,$inOption,$putOption,$offOption);
+        }else{
+            $self->executeSql($sqlPath,$unOption,$inOption,$putOption,$offOption,$branch);
         }
 
-        if($inOption){
-            try {
-                set_time_limit(0);
-                $sqlFile = strtolower(dirname(app_path()).$sqlPath.$branch."-install.sql");
-                if(file_exists($sqlFile)){
-                    $self->info("Patching database file: $sqlFile\n");
-                    DB::unprepared(file_get_contents($sqlFile));
-                }
-            } catch (\Exception $e) {
-                return $self->error($e->getMessage(). "\n" . $e->getTraceAsString() . "\n");
-            }
-        }
-
-        return $self->info("Patching database Success\n");
+        return $self->info("Patching Database Success\n");
     }
 
     /**
@@ -108,5 +93,156 @@ class PatchDb extends Command
         }else{
             return $self->error("Expect parameter '--branch'\n");
         }
+    }
+
+    /**
+     * 根据SQL语句在生产环境进行安装和卸载
+     * @param string $path 脚本路径
+     * @param string $unOption 卸载指令
+     * @param string $inOption 安装指令
+     * @param string $putOption 指定安装的分支名
+     * @param string $offOption 指定卸载的分支名
+     *
+     * @return mixed
+     */
+    public function executeProductionSql($sqlPath,$unOption,$inOption,$putOption,$offOption){
+        $self = $this;
+        $uninstallSqlFile = strtolower(dirname(app_path()).$sqlPath."production-uninstall.sql");
+        $installSqlFile = strtolower(dirname(app_path()).$sqlPath."production-install.sql");
+
+        if($unOption){
+            try {
+                set_time_limit(0);
+                if(file_exists($uninstallSqlFile)){
+                    $self->info("Patching database file: $uninstallSqlFile\n");
+                    DB::unprepared(file_get_contents($uninstallSqlFile));
+                }else{
+                    return $self->info("No Configuration\n");
+                }
+            } catch (\Exception $e) {
+                return $self->error($e->getMessage(). "\n" . $e->getTraceAsString() . "\n");
+            }
+        }
+
+        if($inOption){
+            try {
+                set_time_limit(0);
+                if(file_exists($installSqlFile)){
+                    $self->info("Patching database file: $installSqlFile\n");
+                    DB::unprepared(file_get_contents($installSqlFile));
+                }else{
+                    return $self->info("No Configuration\n");
+                }
+            } catch (\Exception $e) {
+                return $self->error($e->getMessage(). "\n" . $e->getTraceAsString() . "\n");
+            }
+        }
+
+        if($putOption){
+            $installSqlFile = strtolower(dirname(app_path()).$sqlPath.$putOption."-production-install.sql");
+            try {
+                set_time_limit(0);
+                if(file_exists($installSqlFile)){
+                    $self->info("Patching database file: $installSqlFile\n");
+                    DB::unprepared(file_get_contents($installSqlFile));
+                }else{
+                    return $self->info("No Configuration\n");
+                }
+            } catch (\Exception $e) {
+                return $self->error($e->getMessage(). "\n" . $e->getTraceAsString() . "\n");
+            }
+        }
+
+        if($offOption){
+            $uninstallSqlFile = strtolower(dirname(app_path()).$sqlPath.$offOption."-production-uninstall.sql");
+            try {
+                set_time_limit(0);
+                if(file_exists($uninstallSqlFile)){
+                    $self->info("Patching database file: $uninstallSqlFile\n");
+                    DB::unprepared(file_get_contents($uninstallSqlFile));
+                }else{
+                    return $self->info("No Configuration\n");
+                }
+            } catch (\Exception $e) {
+                return $self->error($e->getMessage(). "\n" . $e->getTraceAsString() . "\n");
+            }
+        }
+    }
+
+    /**
+     * 根据SQL语句在生产环境进行安装和卸载
+     *
+     * @param string $path 脚本路径
+     * @param string $unOption 卸载指令
+     * @param string $inOption 安装指令
+     * @param string $putOption 指定安装的分支名
+     * @param string $offOption 指定卸载的分支名
+     * @param string $branch 当前分支名
+     *
+     * @return mixed
+     */
+    public function executeSql($sqlPath,$unOption,$inOption,$putOption,$offOption,$branch){
+        $self = $this;
+        $uninstallSqlFile = strtolower(dirname(app_path()).$sqlPath.$branch."-uninstall.sql");
+        $installSqlFile = strtolower(dirname(app_path()).$sqlPath.$branch."-install.sql");
+
+        if($unOption){
+            try {
+                set_time_limit(0);
+                if(file_exists($uninstallSqlFile)){
+                    $self->info("Patching database file: $uninstallSqlFile\n");
+                    DB::unprepared(file_get_contents($uninstallSqlFile));
+                }else{
+                    return $self->info("No Configuration\n");
+                }
+            } catch (\Exception $e) {
+                return $self->error($e->getMessage(). "\n" . $e->getTraceAsString() . "\n");
+            }
+        }
+
+        if($inOption){
+            try {
+                set_time_limit(0);
+                if(file_exists($installSqlFile)){
+                    $self->info("Patching database file: $installSqlFile\n");
+                    DB::unprepared(file_get_contents($installSqlFile));
+                }else{
+                    return $self->info("No Configuration\n");
+                }
+            } catch (\Exception $e) {
+                return $self->error($e->getMessage(). "\n" . $e->getTraceAsString() . "\n");
+            }
+        }
+
+        if($putOption){
+            $installSqlFile = strtolower(dirname(app_path()).$sqlPath.$putOption."-install.sql");
+            try {
+                set_time_limit(0);
+                if(file_exists($installSqlFile)){
+                    $self->info("Patching database file: $installSqlFile\n");
+                    DB::unprepared(file_get_contents($installSqlFile));
+                }else{
+                    return $self->info("No Configuration\n");
+                }
+            } catch (\Exception $e) {
+                return $self->error($e->getMessage(). "\n" . $e->getTraceAsString() . "\n");
+            }
+        }
+
+        if($offOption){
+            $uninstallSqlFile = strtolower(dirname(app_path()).$sqlPath.$offOption."-uninstall.sql");
+            try {
+                set_time_limit(0);
+                if(file_exists($uninstallSqlFile)){
+                    $self->info("Patching database file: $uninstallSqlFile\n");
+                    DB::unprepared(file_get_contents($uninstallSqlFile));
+                }else{
+                    return $self->info("No Configuration\n");
+                }
+            } catch (\Exception $e) {
+                return $self->error($e->getMessage(). "\n" . $e->getTraceAsString() . "\n");
+            }
+        }
+
     }
 }
