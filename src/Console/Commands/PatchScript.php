@@ -137,7 +137,7 @@ class PatchScript extends Command
     }
 
     /**
-     * 根据运行指令进行安装和卸载
+     * 在测试环境进行安装和卸载配置文件
      *
      * @param string $path 脚本路径
      * @param string $unOption 卸载指令

@@ -136,7 +136,7 @@ class PatchDb extends Command
     }
 
     /**
-     * 根据SQL语句在生产环境进行安装和卸载
+     * 根据SQL语句在测试环境进行安装和卸载
      *
      * @param string $path 脚本路径
      * @param string $unOption 卸载指令
