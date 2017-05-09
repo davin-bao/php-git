@@ -77,8 +77,8 @@ http://your_domain/_tool/git
 
   [branch name]-install.sql  切换分支后执行的卸载的sql语句(只影响测试环境)
 
-  [branch name]-production.php   修改配置文件参数脚本文件 需含有 install，uninstall 两个方法(只影响生产环境)
+  [branch name]-production.php   修改配置文件参数脚本文件，该文件只用于合并生成只在生产环境生效的参数配置文件 需含有 install，uninstall 两个方法(只影响生产环境)
 
-  [branch name]-production-uninstall.sql  切换分支前执行的安装sql语句(只影响生产环境)
+  [branch name]-production-uninstall.sql 安装的sql语句，该文件只用于合并生成只在生产环境生效的sql语句文件(只影响生产环境)
 
-  [branch name]-production-install.sql  切换分支后执行的卸载的sql语句(只影响生产环境)
+  [branch name]-production-install.sql 卸载的sql语句，该文件只用于合并生成只在生产环境生效的sql语句文件(只影响生产环境)
