@@ -44,9 +44,7 @@ class PatchDb extends Command
     {
         return [
             ['uninstall', 'u', InputOption::VALUE_NONE, 'uninstall for patch.'],
-            ['install', 'i', InputOption::VALUE_NONE, 'install for patch.'],
-            ['put_file', 'p', InputOption::VALUE_OPTIONAL, 'install for sql file.'],
-            ['off_file', 'o', InputOption::VALUE_OPTIONAL, 'uninstall for sql file.'],
+            ['install', 'i', InputOption::VALUE_NONE, 'install for patch.']
         ];
     }
     /**
@@ -60,18 +58,16 @@ class PatchDb extends Command
         $self->info("Patching database... \n");
         $unOption = $this->option('uninstall');
         $inOption = $this->option('install');
-        $putOption = $this->option('put_file');
-        $offOption = $this->option('off_file');
 
         $sqlPath = app('config')->get('phpgit.path');
 
         $branch = $self->getBranch($self);
 
-        $production = app('config')->get('app.debug');
-        if(!$production){
-            $self->executeProductionSql($sqlPath,$unOption,$inOption,$putOption,$offOption);
+        $production =(env('APP_ENV') === 'production');
+        if($production){
+            $self->executeProductionSql($sqlPath,$unOption,$inOption);
         }else{
-            $self->executeSql($sqlPath,$unOption,$inOption,$putOption,$offOption,$branch);
+            $self->executeSql($sqlPath,$unOption,$inOption,$branch);
         }
 
         return $self->info("Patching Database Success\n");
@@ -105,7 +101,7 @@ class PatchDb extends Command
      *
      * @return mixed
      */
-    public function executeProductionSql($sqlPath,$unOption,$inOption,$putOption,$offOption){
+    public function executeProductionSql($sqlPath,$unOption,$inOption){
         $self = $this;
         $uninstallSqlFile = strtolower(dirname(app_path()).$sqlPath."production-uninstall.sql");
         $installSqlFile = strtolower(dirname(app_path()).$sqlPath."production-install.sql");
@@ -137,36 +133,6 @@ class PatchDb extends Command
                 return $self->error($e->getMessage(). "\n" . $e->getTraceAsString() . "\n");
             }
         }
-
-        if($putOption){
-            $installSqlFile = strtolower(dirname(app_path()).$sqlPath.$putOption."-production-install.sql");
-            try {
-                set_time_limit(0);
-                if(file_exists($installSqlFile)){
-                    $self->info("Patching database file: $installSqlFile\n");
-                    DB::unprepared(file_get_contents($installSqlFile));
-                }else{
-                    return $self->info("No Configuration\n");
-                }
-            } catch (\Exception $e) {
-                return $self->error($e->getMessage(). "\n" . $e->getTraceAsString() . "\n");
-            }
-        }
-
-        if($offOption){
-            $uninstallSqlFile = strtolower(dirname(app_path()).$sqlPath.$offOption."-production-uninstall.sql");
-            try {
-                set_time_limit(0);
-                if(file_exists($uninstallSqlFile)){
-                    $self->info("Patching database file: $uninstallSqlFile\n");
-                    DB::unprepared(file_get_contents($uninstallSqlFile));
-                }else{
-                    return $self->info("No Configuration\n");
-                }
-            } catch (\Exception $e) {
-                return $self->error($e->getMessage(). "\n" . $e->getTraceAsString() . "\n");
-            }
-        }
     }
 
     /**
@@ -181,7 +147,7 @@ class PatchDb extends Command
      *
      * @return mixed
      */
-    public function executeSql($sqlPath,$unOption,$inOption,$putOption,$offOption,$branch){
+    public function executeSql($sqlPath,$unOption,$inOption,$branch){
         $self = $this;
         $uninstallSqlFile = strtolower(dirname(app_path()).$sqlPath.$branch."-uninstall.sql");
         $installSqlFile = strtolower(dirname(app_path()).$sqlPath.$branch."-install.sql");
@@ -206,36 +172,6 @@ class PatchDb extends Command
                 if(file_exists($installSqlFile)){
                     $self->info("Patching database file: $installSqlFile\n");
                     DB::unprepared(file_get_contents($installSqlFile));
-                }else{
-                    return $self->info("No Configuration\n");
-                }
-            } catch (\Exception $e) {
-                return $self->error($e->getMessage(). "\n" . $e->getTraceAsString() . "\n");
-            }
-        }
-
-        if($putOption){
-            $installSqlFile = strtolower(dirname(app_path()).$sqlPath.$putOption."-install.sql");
-            try {
-                set_time_limit(0);
-                if(file_exists($installSqlFile)){
-                    $self->info("Patching database file: $installSqlFile\n");
-                    DB::unprepared(file_get_contents($installSqlFile));
-                }else{
-                    return $self->info("No Configuration\n");
-                }
-            } catch (\Exception $e) {
-                return $self->error($e->getMessage(). "\n" . $e->getTraceAsString() . "\n");
-            }
-        }
-
-        if($offOption){
-            $uninstallSqlFile = strtolower(dirname(app_path()).$sqlPath.$offOption."-uninstall.sql");
-            try {
-                set_time_limit(0);
-                if(file_exists($uninstallSqlFile)){
-                    $self->info("Patching database file: $uninstallSqlFile\n");
-                    DB::unprepared(file_get_contents($uninstallSqlFile));
                 }else{
                     return $self->info("No Configuration\n");
                 }

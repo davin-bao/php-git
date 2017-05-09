@@ -46,8 +46,6 @@ class PatchScript extends Command
         return [
             ['uninstall', 'u', InputOption::VALUE_NONE, 'uninstall for patch.'],
             ['install', 'i', InputOption::VALUE_NONE, 'install for patch.'],
-            ['put_file', 'p', InputOption::VALUE_OPTIONAL, 'install for file.'],
-            ['off_file', 'o', InputOption::VALUE_OPTIONAL, 'uninstall for file.'],
         ];
     }
     /**
@@ -61,8 +59,6 @@ class PatchScript extends Command
         $self->info("Patching script... \n");
         $unOption = $this->option('uninstall');
         $inOption = $this->option('install');
-        $putOption = $this->option('put_file');
-        $offOption = $this->option('off_file');
 
         $path = app('config')->get('phpgit.path');
         $branch = $self->getBranch($self);
@@ -72,11 +68,11 @@ class PatchScript extends Command
             require_once $scriptFile;
         }
 
-        $production = app('config')->get('app.debug');
-        if(!$production){
-            $self->executeProductionCommand($path,$unOption,$inOption,$putOption,$offOption);
+        $production = (env('APP_ENV') === 'production');
+        if($production){
+            $self->executeProductionCommand($path,$unOption,$inOption);
         }else{
-            $self-> executeCommand($path,$unOption,$inOption,$putOption,$offOption,$branch);
+            $self-> executeCommand($path,$unOption,$inOption,$branch);
         }
         return $self->info("Patching Script Success\n");
     }
@@ -109,7 +105,7 @@ class PatchScript extends Command
      *
      * @return mixed
      */
-    public function executeProductionCommand($path,$unOption,$inOption,$putOption,$offOption){
+    public function executeProductionCommand($path,$unOption,$inOption){
         $self = $this;
         $pathFile = strtolower(dirname(app_path()).$path."production.php");
         if (!file_exists($pathFile)){
@@ -138,38 +134,6 @@ class PatchScript extends Command
                 return $self -> error($e->getMessage(). "\n" . $e->getTraceAsString() . "\n");
             }
         }
-
-        if($putOption){
-            $class = str_replace('-','',ucfirst($putOption))."ProductionScript";
-            $pathFile = strtolower(dirname(app_path()).$path.$putOption."-production.php");
-            if (!file_exists($pathFile)){
-                return $self->info("No Configuration\n");
-            }
-            require_once $pathFile;
-            try {
-                set_time_limit(0);
-                $script = eval("return new \\$class();");
-                $script -> install();
-            } catch (\Exception $e) {
-                return $self -> error($e->getMessage(). "\n" . $e->getTraceAsString() . "\n");
-            }
-        }
-
-        if($offOption){
-            $class = str_replace('-','',ucfirst($offOption))."ProductionScript";
-            $pathFile = strtolower(dirname(app_path()).$path.$offOption."-production.php");
-            if (!file_exists($pathFile)){
-                return $self->info("No Configuration\n");
-            }
-            require_once $pathFile;
-            try {
-                set_time_limit(0);
-                $script = eval("return new \\$class();");
-                $script -> uninstall();
-            } catch (\Exception $e) {
-                return $self -> error($e->getMessage(). "\n" . $e->getTraceAsString() . "\n");
-            }
-        }
     }
 
     /**
@@ -184,11 +148,12 @@ class PatchScript extends Command
      *
      * @return mixed
      */
-    public function executeCommand($path,$unOption,$inOption,$putOption,$offOption,$branch){
+    public function executeCommand($path,$unOption,$inOption,$branch)
+    {
         $self = $this;
-        $class = str_replace('-','',ucfirst($branch))."Script";
-        $pathFile = strtolower(dirname(app_path()).$path.$branch.".php");
-        if (!file_exists($pathFile)){
+        $class = str_replace('-', '', ucfirst($branch)) . "Script";
+        $pathFile = strtolower(dirname(app_path()) . $path . $branch . ".php");
+        if (!file_exists($pathFile)) {
             return $self->info("No Configuration\n");
         }
         require_once $pathFile;
@@ -196,52 +161,19 @@ class PatchScript extends Command
             try {
                 set_time_limit(0);
                 $script = eval("return new \\$class();");
-                $script -> uninstall();
+                $script->uninstall();
             } catch (\Exception $e) {
-                return $self -> error($e->getMessage(). "\n" . $e->getTraceAsString() . "\n");
+                return $self->error($e->getMessage() . "\n" . $e->getTraceAsString() . "\n");
             }
         }
-        if($inOption){
+        if ($inOption) {
             try {
                 set_time_limit(0);
                 $script = eval("return new \\$class();");
                 $script->install();
             } catch (\Exception $e) {
-                return $self->error($e->getMessage(). "\n" . $e->getTraceAsString() . "\n");
-            }
-        }
-
-        if($putOption){
-            $class = str_replace('-','',ucfirst($putOption))."Script";
-            $pathFile = strtolower(dirname(app_path()).$path.$putOption.".php");
-            if (!file_exists($pathFile)){
-                return $self->info("No Configuration\n");
-            }
-            require_once $pathFile;
-            try {
-                set_time_limit(0);
-                $script = eval("return new \\$class();");
-                $script -> install();
-            } catch (\Exception $e) {
-                return $self -> error($e->getMessage(). "\n" . $e->getTraceAsString() . "\n");
-            }
-        }
-
-        if($offOption){
-            $class = str_replace('-','',ucfirst($offOption))."Script";
-            $pathFile = strtolower(dirname(app_path()).$path.$offOption.".php");
-            if (!file_exists($pathFile)){
-                return $self->info("No Configuration\n");
-            }
-            require_once $pathFile;
-            try {
-                set_time_limit(0);
-                $script = eval("return new \\$class();");
-                $script -> uninstall();
-            } catch (\Exception $e) {
-                return $self -> error($e->getMessage(). "\n" . $e->getTraceAsString() . "\n");
+                return $self->error($e->getMessage() . "\n" . $e->getTraceAsString() . "\n");
             }
         }
     }
-
 }
