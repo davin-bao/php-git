@@ -68,11 +68,17 @@ class PatchScript extends Command
             require_once $scriptFile;
         }
 
+        $class = str_replace('-', '', ucfirst($branch)) . "Script";
+        $pathFile = strtolower(dirname(app_path()) . $path . $branch . ".php");
+        $productionPathFile =  strtolower(dirname(app_path()).$path."production.php");
+        $productionClass = "ProductionScript";
+
+
         $production = (env('APP_ENV') === 'production');
         if($production){
-            $self->executeProductionCommand($path,$unOption,$inOption);
+            $self->executeCommand($unOption,$inOption,$class,$pathFile);
         }else{
-            $self-> executeCommand($path,$unOption,$inOption,$branch);
+            $self-> executeCommand($unOption,$inOption,$productionClass,$productionPathFile);
         }
         return $self->info("Patching Script Success\n");
     }
@@ -96,63 +102,18 @@ class PatchScript extends Command
     }
 
     /**
-     * 根据指令在生产环境进行安装和卸载配置文件
-     * @param string $path 脚本路径
+     * 安装和卸载配置文件
+     *
      * @param string $unOption 卸载指令
      * @param string $inOption 安装指令
-     * @param string $putOption 指定安装的分支名
-     * @param string $offOption 指定卸载的分支名
+     * @param string $class 类名
+     * @param string $pathFile 文件路径
      *
      * @return mixed
      */
-    public function executeProductionCommand($path,$unOption,$inOption){
-        $self = $this;
-        $pathFile = strtolower(dirname(app_path()).$path."production.php");
-        if (!file_exists($pathFile)){
-            return $self->info("No Configuration\n");
-        }
-        require_once $pathFile;
-
-        $class = "ProductionScript";
-
-        if($inOption){
-            try {
-                set_time_limit(0);
-                $script = eval("return new \\$class();");
-                $script -> install();
-            } catch (\Exception $e) {
-                return $self -> error($e->getMessage(). "\n" . $e->getTraceAsString() . "\n");
-            }
-        }
-
-        if($unOption){
-            try {
-                set_time_limit(0);
-                $script = eval("return new \\$class();");
-                $script -> uninstall();
-            } catch (\Exception $e) {
-                return $self -> error($e->getMessage(). "\n" . $e->getTraceAsString() . "\n");
-            }
-        }
-    }
-
-    /**
-     * 在测试环境进行安装和卸载配置文件
-     *
-     * @param string $path 脚本路径
-     * @param string $unOption 卸载指令
-     * @param string $inOption 安装指令
-     * @param string $putOption 指定安装的分支名
-     * @param string $offOption 指定卸载的分支名
-     * @param string $branch 当前分支名
-     *
-     * @return mixed
-     */
-    public function executeCommand($path,$unOption,$inOption,$branch)
+    public function executeCommand($unOption,$inOption,$class,$pathFile)
     {
         $self = $this;
-        $class = str_replace('-', '', ucfirst($branch)) . "Script";
-        $pathFile = strtolower(dirname(app_path()) . $path . $branch . ".php");
         if (!file_exists($pathFile)) {
             return $self->info("No Configuration\n");
         }

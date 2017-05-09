@@ -60,14 +60,18 @@ class PatchDb extends Command
         $inOption = $this->option('install');
 
         $sqlPath = app('config')->get('phpgit.path');
-
         $branch = $self->getBranch($self);
+
+        $uninstallSqlFile = strtolower(dirname(app_path()).$sqlPath.$branch."-uninstall.sql");
+        $installSqlFile = strtolower(dirname(app_path()).$sqlPath.$branch."-install.sql");
+        $productionUninstallSqlFile = strtolower(dirname(app_path()).$sqlPath."production-uninstall.sql");
+        $productionInstallSqlFile = strtolower(dirname(app_path()).$sqlPath."production-install.sql");
 
         $production =(env('APP_ENV') === 'production');
         if($production){
-            $self->executeProductionSql($sqlPath,$unOption,$inOption);
+            $self->executeSql($unOption,$inOption,$productionUninstallSqlFile,$productionInstallSqlFile);
         }else{
-            $self->executeSql($sqlPath,$unOption,$inOption,$branch);
+            $self->executeSql($unOption,$inOption,$uninstallSqlFile,$installSqlFile);
         }
 
         return $self->info("Patching Database Success\n");
@@ -92,20 +96,16 @@ class PatchDb extends Command
     }
 
     /**
-     * 根据SQL语句在生产环境进行安装和卸载
-     * @param string $path 脚本路径
+     * 根据SQL语句进行安装和卸载
      * @param string $unOption 卸载指令
      * @param string $inOption 安装指令
-     * @param string $putOption 指定安装的分支名
-     * @param string $offOption 指定卸载的分支名
+     * @param string $uninstallSqlFile 卸载内容
+     * @param string $installSqlFile 安装内容
      *
      * @return mixed
      */
-    public function executeProductionSql($sqlPath,$unOption,$inOption){
+    public function executeSql($unOption,$inOption,$uninstallSqlFile,$installSqlFile){
         $self = $this;
-        $uninstallSqlFile = strtolower(dirname(app_path()).$sqlPath."production-uninstall.sql");
-        $installSqlFile = strtolower(dirname(app_path()).$sqlPath."production-install.sql");
-
         if($unOption){
             try {
                 set_time_limit(0);
@@ -135,50 +135,4 @@ class PatchDb extends Command
         }
     }
 
-    /**
-     * 根据SQL语句在测试环境进行安装和卸载
-     *
-     * @param string $path 脚本路径
-     * @param string $unOption 卸载指令
-     * @param string $inOption 安装指令
-     * @param string $putOption 指定安装的分支名
-     * @param string $offOption 指定卸载的分支名
-     * @param string $branch 当前分支名
-     *
-     * @return mixed
-     */
-    public function executeSql($sqlPath,$unOption,$inOption,$branch){
-        $self = $this;
-        $uninstallSqlFile = strtolower(dirname(app_path()).$sqlPath.$branch."-uninstall.sql");
-        $installSqlFile = strtolower(dirname(app_path()).$sqlPath.$branch."-install.sql");
-
-        if($unOption){
-            try {
-                set_time_limit(0);
-                if(file_exists($uninstallSqlFile)){
-                    $self->info("Patching database file: $uninstallSqlFile\n");
-                    DB::unprepared(file_get_contents($uninstallSqlFile));
-                }else{
-                    return $self->info("No Configuration\n");
-                }
-            } catch (\Exception $e) {
-                return $self->error($e->getMessage(). "\n" . $e->getTraceAsString() . "\n");
-            }
-        }
-
-        if($inOption){
-            try {
-                set_time_limit(0);
-                if(file_exists($installSqlFile)){
-                    $self->info("Patching database file: $installSqlFile\n");
-                    DB::unprepared(file_get_contents($installSqlFile));
-                }else{
-                    return $self->info("No Configuration\n");
-                }
-            } catch (\Exception $e) {
-                return $self->error($e->getMessage(). "\n" . $e->getTraceAsString() . "\n");
-            }
-        }
-
-    }
 }
