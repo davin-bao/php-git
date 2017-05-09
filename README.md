@@ -67,12 +67,18 @@ http://your_domain/_tool/git
 
    提示：必须是.env文件里没有配置 PHP_GIT_COMMAND 和 PHP_SCRIPT_COMMAND 参数才可生效
 
-2.在 sql文件的存放路径 创建文件（BranchName 分支名）
+2.在 sql文件的存放路径 创建文件（[branch name] 分支名）
 
-  创建3个文件：
+  创建6个文件：
 
-  BranchName.php   修改配置文件参数脚本文件 需含有 install，uninstall 两个方法
+  [branch name].php   修改配置文件参数脚本文件 需含有 install，uninstall 两个方法(只影响测试环境)
 
-  BranchName-uninstall.sql  切换分支前执行的安装sql语句
+  [branch name]-uninstall.sql  切换分支前执行的安装sql语句(只影响测试环境)
 
-  BranchName-install.sql  切换分支后执行的卸载的sql语句
+  [branch name]-install.sql  切换分支后执行的卸载的sql语句(只影响测试环境)
+
+  [branch name]-production.php   修改配置文件参数脚本文件 需含有 install，uninstall 两个方法(只影响生产环境)
+
+  [branch name]-production-uninstall.sql  切换分支前执行的安装sql语句(只影响生产环境)
+
+  [branch name]-production-install.sql  切换分支后执行的卸载的sql语句(只影响生产环境)
