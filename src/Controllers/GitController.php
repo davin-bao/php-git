@@ -69,8 +69,9 @@ class GitController extends BaseController
             });
             if(!$process->isSuccessful() ||
                 (strpos($commandOutput, 'Rebuild database Success') === false &&
-                    strpos($commandOutput, 'Patching script Success') === false &&
-                    strpos($commandOutput, 'Patching database Success') === false)
+                 strpos($commandOutput, 'Patching Script Success') === false &&
+                 strpos($commandOutput, 'Patching Database Success') === false &&
+                 strpos($commandOutput, 'No Configuration') === false)
             ){
                 return new JsonResponse(['msg'=>$commandOutput, 'code'=>500], 500, $headers = [], 0);
             }
@@ -93,9 +94,9 @@ class GitController extends BaseController
                 });
                 if(!$process->isSuccessful() ||
                     (strpos($commandOutput, 'Rebuild database Success') === false &&
-                        strpos($commandOutput, 'Patching script Success') === false &&
-                        strpos($commandOutput, 'Patching database Success') === false
-                    )
+                     strpos($commandOutput, 'Patching Script Success') === false &&
+                     strpos($commandOutput, 'Patching Database Success') === false &&
+                     strpos($commandOutput, 'No Configuration') === false)
                 ){
                     return new JsonResponse(['msg'=>$commandOutput, 'code'=>500], 500, $headers = [], 0);
                 }

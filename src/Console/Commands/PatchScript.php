@@ -57,47 +57,28 @@ class PatchScript extends Command
     {
         $self = $this;
         $self->info("Patching script... \n");
-
         $unOption = $this->option('uninstall');
         $inOption = $this->option('install');
 
         $path = app('config')->get('phpgit.path');
-
         $branch = $self->getBranch($self);
 
         $scriptFile = dirname(app_path()).$path."ScriptBase.php";
-
         if(file_exists($scriptFile)){
             require_once $scriptFile;
         }
 
-        if ($unOption) {
-            try {
-                set_time_limit(0);
-                $pathFile = strtolower(dirname(app_path()).$path.$branch.".php");
-                if (file_exists($pathFile)){
-                    require_once $pathFile;
-                    $script = new \Script();
-                    $script->uninstall($branch);
-                }
-            } catch (\Exception $e) {
-                return $self->error($e->getMessage(). "\n" . $e->getTraceAsString() . "\n");
-            }
-        }
+        $class = str_replace('-', '', ucfirst($branch)) . "Script";
+        $pathFile = strtolower(dirname(app_path()) . $path . $branch . ".php");
+        $productionPathFile =  strtolower(dirname(app_path()).$path."production.php");
+        $productionClass = "ProductionScript";
 
-        if($inOption){
-            try {
-                set_time_limit(0);
-                $pathFile = strtolower(dirname(app_path()).$path."$branch.php");
 
-                if (file_exists($pathFile)){
-                    require_once $pathFile;
-                    $script =new \Script();
-                    $script->install($branch);
-                }
-            } catch (\Exception $e) {
-                return $self->error($e->getMessage(). "\n" . $e->getTraceAsString() . "\n");
-            }
+        $production = (env('APP_ENV') === 'production');
+        if($production){
+            $self->executeCommand($unOption,$inOption,$class,$pathFile);
+        }else{
+            $self-> executeCommand($unOption,$inOption,$productionClass,$productionPathFile);
         }
         return $self->info("Patching Script Success\n");
     }
@@ -117,6 +98,43 @@ class PatchScript extends Command
             return $branch;
         }else{
             return $self->error("Expect parameter '--branch'\n");
+        }
+    }
+
+    /**
+     * 安装和卸载配置文件
+     *
+     * @param string $unOption 卸载指令
+     * @param string $inOption 安装指令
+     * @param string $class 类名
+     * @param string $pathFile 文件路径
+     *
+     * @return mixed
+     */
+    public function executeCommand($unOption,$inOption,$class,$pathFile)
+    {
+        $self = $this;
+        if (!file_exists($pathFile)) {
+            return $self->info("No Configuration\n");
+        }
+        require_once $pathFile;
+        if ($unOption) {
+            try {
+                set_time_limit(0);
+                $script = eval("return new \\$class();");
+                $script->uninstall();
+            } catch (\Exception $e) {
+                return $self->error($e->getMessage() . "\n" . $e->getTraceAsString() . "\n");
+            }
+        }
+        if ($inOption) {
+            try {
+                set_time_limit(0);
+                $script = eval("return new \\$class();");
+                $script->install();
+            } catch (\Exception $e) {
+                return $self->error($e->getMessage() . "\n" . $e->getTraceAsString() . "\n");
+            }
         }
     }
 }
