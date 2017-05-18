@@ -58,50 +58,12 @@ class GitController extends BaseController
         $branch = $request->get('branch', 'master');
         $repo = $this->getRepo($request);
 
-        $commands = app('config')->get('phpgit.uninstall_command');
-        foreach($commands as $command){
-            $process = new Process($command);
-            $workingDirectory = $process->getWorkingDirectory();
-            $process->setWorkingDirectory(str_replace('/public', '', $workingDirectory));
-            $commandOutput = '';
-            $process->run(function ($type, $buffer) use(&$commandOutput) {
-                $commandOutput = $commandOutput . nl2br($buffer);
-            });
-            if(!$process->isSuccessful() ||
-                (strpos($commandOutput, 'Rebuild database Success') === false &&
-                 strpos($commandOutput, 'Patching Script Success') === false &&
-                 strpos($commandOutput, 'Patching Database Success') === false &&
-                 strpos($commandOutput, 'No Configuration') === false)
-            ){
-                return new JsonResponse(['msg'=>$commandOutput, 'code'=>500], 500, $headers = [], 0);
-            }
-        }
-
+        $this->runUninstallCommand();
         $repo->clean(true, true);
         $repo->checkout($branch);
         $result = $repo->pull('origin', $branch);
+        $this->runInstallCommand();
 
-        $commands = app('config')->get('phpgit.install_command');
-        foreach($commands as $command){
-            if($command){
-                $process = new Process($command);
-                $workingDirectory = $process->getWorkingDirectory();
-                $process->setWorkingDirectory(str_replace('/public', '', $workingDirectory));
-
-                $commandOutput = '';
-                $process->run(function ($type, $buffer) use(&$commandOutput) {
-                    $commandOutput = $commandOutput . nl2br($buffer);
-                });
-                if(!$process->isSuccessful() ||
-                    (strpos($commandOutput, 'Rebuild database Success') === false &&
-                     strpos($commandOutput, 'Patching Script Success') === false &&
-                     strpos($commandOutput, 'Patching Database Success') === false &&
-                     strpos($commandOutput, 'No Configuration') === false)
-                ){
-                    return new JsonResponse(['msg'=>$commandOutput, 'code'=>500], 500, $headers = [], 0);
-                }
-            }
-        }
         return new JsonResponse(['msg'=>$result, 'code'=>200], 200, $headers = [], 0);
     }
 
@@ -109,6 +71,7 @@ class GitController extends BaseController
         $branch = $request->get('branch', 'origin/master');
         $repo = $this->getRepo($request);
 
+        $this->runUninstallCommand();
         $repo->clean(true, true);
         $result = $repo->remote_checkout($branch);
 
@@ -117,6 +80,7 @@ class GitController extends BaseController
             $process = new Process($command);
             $process->run();
         }
+        $this->runInstallCommand();
 
         return new JsonResponse(['msg'=>$result, 'code'=>200], 200, $headers = [], 0);
     }
@@ -135,5 +99,50 @@ class GitController extends BaseController
             $this->repo = Git::open($currentRepo);
         }
         return $this->repo;
+    }
+
+    private function runInstallCommand(){
+        $commands = app('config')->get('phpgit.install_command');
+        foreach($commands as $command){
+            if($command){
+                $process = new Process($command);
+                $workingDirectory = $process->getWorkingDirectory();
+                $process->setWorkingDirectory(str_replace('/public', '', $workingDirectory));
+
+                $commandOutput = '';
+                $process->run(function ($type, $buffer) use(&$commandOutput) {
+                    $commandOutput = $commandOutput . nl2br($buffer);
+                });
+                if(!$process->isSuccessful() ||
+                    (strpos($commandOutput, 'Rebuild database Success') === false &&
+                        strpos($commandOutput, 'Patching Script Success') === false &&
+                        strpos($commandOutput, 'Patching Database Success') === false &&
+                        strpos($commandOutput, 'No Configuration') === false)
+                ){
+                    return new JsonResponse(['msg'=>$commandOutput, 'code'=>500], 500, $headers = [], 0);
+                }
+            }
+        }
+    }
+
+    private function runUninstallCommand(){
+        $commands = app('config')->get('phpgit.uninstall_command');
+        foreach($commands as $command){
+            $process = new Process($command);
+            $workingDirectory = $process->getWorkingDirectory();
+            $process->setWorkingDirectory(str_replace('/public', '', $workingDirectory));
+            $commandOutput = '';
+            $process->run(function ($type, $buffer) use(&$commandOutput) {
+                $commandOutput = $commandOutput . nl2br($buffer);
+            });
+            if(!$process->isSuccessful() ||
+                (strpos($commandOutput, 'Rebuild database Success') === false &&
+                    strpos($commandOutput, 'Patching Script Success') === false &&
+                    strpos($commandOutput, 'Patching Database Success') === false &&
+                    strpos($commandOutput, 'No Configuration') === false)
+            ){
+                return new JsonResponse(['msg'=>$commandOutput, 'code'=>500], 500, $headers = [], 0);
+            }
+        }
     }
 }
