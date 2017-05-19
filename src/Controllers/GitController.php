@@ -18,7 +18,8 @@ class GitController extends BaseController
 
     public function __construct() {
 
-        Git::$bin = app('config')->get('phpgit.git_path');
+        Git::$bin = config('phpgit.git_path');
+        Git::$sshKey = config('phpgit.ssh_private_key');
         parent::__construct();
     }
 

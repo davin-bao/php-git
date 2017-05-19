@@ -20,6 +20,8 @@ return array(
 
     'git_path' => '/usr/bin/git',
 
+    'ssh_private_key' => '/root/.ssh/id_rsa',
+
     /*
      | git repositories root path
      */
