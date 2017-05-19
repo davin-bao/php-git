@@ -74,12 +74,6 @@ class GitController extends BaseController
         $this->runUninstallCommand();
         $repo->clean(true, true);
         $result = $repo->remote_checkout($branch);
-
-        $commands = app('config')->get('phpgit.command');
-        foreach($commands as $command){
-            $process = new Process($command);
-            $process->run();
-        }
         $this->runInstallCommand();
 
         return new JsonResponse(['msg'=>$result, 'code'=>200], 200, $headers = [], 0);

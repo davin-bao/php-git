@@ -585,7 +585,7 @@ class GitRepo {
      * @return  string
      */
     public function fetch() {
-        return $this->run("fetch --progress --prune");
+        return $this->run_command("ssh-agent -s $(ssh-add /root/.ssh/id_rsa && " . Git::get_bin(). " fetch --progress --prune)");
     }
 
     /**
@@ -635,7 +635,7 @@ class GitRepo {
      * @return string
      */
     public function push($remote, $branch) {
-        return $this->run("push --tags $remote $branch");
+        return $this->run_command("ssh-agent -s $(ssh-add /root/.ssh/id_rsa && " . Git::get_bin(). " push --tags $remote $branch)");
     }
 
     /**
@@ -648,7 +648,7 @@ class GitRepo {
      * @return string
      */
     public function pull($remote, $branch) {
-        return $this->run("pull $remote $branch");
+        return $this->run_command("ssh-agent -s $(ssh-add /root/.ssh/id_rsa && " . Git::get_bin(). " pull $remote $branch)");
     }
 
     /**
