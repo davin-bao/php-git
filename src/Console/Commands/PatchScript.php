@@ -76,9 +76,9 @@ class PatchScript extends Command
 
         $production = (env('APP_ENV') === 'production');
         if($production){
-            $self->executeCommand($unOption,$inOption,$class,$pathFile);
-        }else{
             $self-> executeCommand($unOption,$inOption,$productionClass,$productionPathFile);
+        }else{
+            $self->executeCommand($unOption,$inOption,$class,$pathFile);
         }
         return $self->info("Patching Script Success\n");
     }
